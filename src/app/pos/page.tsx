@@ -64,7 +64,13 @@ interface CompletedOrderData {
 }
 
 export default function PosTerminal() {
-  const { activeStore } = useStore();
+  const { stores, activeStore, setActiveStoreId } = useStore();
+
+  useEffect(() => {
+    if (!activeStore && stores.length > 0) {
+      setActiveStoreId(stores[0]._id);
+    }
+  }, [activeStore, stores, setActiveStoreId]);
 
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [categories, setCategories] = useState<string[]>(['ALL']);
@@ -104,12 +110,12 @@ export default function PosTerminal() {
     }
   }, [activeStore]);
 
-  // Fetch products scoped to activeStore
+  // Fetch products scoped to activeStore (or general if store is loading)
   const fetchProducts = useCallback(async () => {
-    if (!activeStore) return;
     try {
       setIsLoading(true);
-      const res = await fetch(`/api/products?storeId=${activeStore._id}`);
+      const url = activeStore ? `/api/products?storeId=${activeStore._id}` : '/api/products';
+      const res = await fetch(url);
       const data = await res.json();
       if (Array.isArray(data)) {
         setProducts(data);
@@ -408,10 +414,10 @@ export default function PosTerminal() {
               </div>
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div className="flex h-64 flex-col items-center justify-center text-center text-neutral-400">
-              <ShoppingBag className="h-10 w-10 text-neutral-600 mb-2" />
-              <p className="text-sm font-semibold text-white">No products found</p>
-              <p className="text-xs text-neutral-500 mt-1">Try adjusting your search or category filter</p>
+            <div className="flex h-64 flex-col items-center justify-center text-center text-slate-500 dark:text-neutral-400">
+              <ShoppingBag className="h-10 w-10 text-slate-300 dark:text-neutral-600 mb-2" />
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">No products found</p>
+              <p className="text-xs text-slate-500 dark:text-neutral-500 mt-1">Try adjusting your search or category filter</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
@@ -518,7 +524,7 @@ export default function PosTerminal() {
         </div>
 
         {/* Order Mode & Metadata Selector (Strict Store Type Separation) */}
-        <div className="p-3 border-b border-neutral-800/80 bg-neutral-900/30 space-y-2 text-xs">
+        <div className="p-3 border-b border-slate-200 dark:border-neutral-800/80 bg-slate-50/70 dark:bg-neutral-900/30 space-y-2 text-xs">
           {activeStore?.type === 'restaurant' ? (
             <>
               <div className="flex items-center gap-1.5">
@@ -528,8 +534,8 @@ export default function PosTerminal() {
                     onClick={() => setOrderType(type)}
                     className={`flex-1 py-1.5 rounded-xl font-medium transition-all ${
                       orderType === type
-                        ? 'bg-neutral-800 text-orange-400 border border-orange-500/40 shadow-sm font-semibold'
-                        : 'bg-neutral-950 text-neutral-400 hover:text-white'
+                        ? 'bg-white dark:bg-neutral-800 text-orange-600 dark:text-orange-400 border border-orange-500/40 shadow-sm font-semibold'
+                        : 'bg-slate-200/70 dark:bg-neutral-950 text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     {type === 'DINE_IN' ? '🍽️ Dine-In' : '🥡 Takeaway'}
@@ -544,14 +550,14 @@ export default function PosTerminal() {
                     placeholder="Table # (e.g. Table 4)"
                     value={tableNumber}
                     onChange={(e) => setTableNumber(e.target.value)}
-                    className="flex-1 rounded-lg border border-neutral-700 bg-neutral-950 px-2.5 py-1 text-xs text-white focus:border-orange-500 focus:outline-none"
+                    className="flex-1 rounded-lg border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 px-2.5 py-1 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:border-orange-500 focus:outline-none"
                   />
                   <input
                     type="text"
                     placeholder="Guest Name"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    className="flex-1 rounded-lg border border-neutral-700 bg-neutral-950 px-2.5 py-1 text-xs text-white focus:border-orange-500 focus:outline-none"
+                    className="flex-1 rounded-lg border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 px-2.5 py-1 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:border-orange-500 focus:outline-none"
                   />
                 </div>
               ) : (
@@ -561,18 +567,18 @@ export default function PosTerminal() {
                     placeholder="Guest / Pickup Name"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-2.5 py-1 text-xs text-white focus:border-orange-500 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 px-2.5 py-1 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:border-orange-500 focus:outline-none"
                   />
                 </div>
               )}
             </>
           ) : (
             <div className="flex items-center justify-between py-1 px-1">
-              <div className="flex items-center gap-1.5 text-neutral-300 font-semibold">
-                <span className="h-2 w-2 rounded-full bg-blue-400" />
+              <div className="flex items-center gap-1.5 text-slate-700 dark:text-neutral-300 font-semibold">
+                <span className="h-2 w-2 rounded-full bg-blue-500" />
                 <span>Retail Checkout Terminal</span>
               </div>
-              <span className="font-mono text-[10px] uppercase font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+              <span className="font-mono text-[10px] uppercase font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-500/20">
                 Barcode Wedge Active
               </span>
             </div>
@@ -582,10 +588,10 @@ export default function PosTerminal() {
         {/* Cart Items List */}
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
           {cart.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center text-center text-neutral-500">
-              <ShoppingBag className="h-12 w-12 text-neutral-700 mb-2 stroke-[1.5]" />
-              <p className="text-sm font-medium text-neutral-400">Cart is empty</p>
-              <p className="text-xs text-neutral-600 mt-1 max-w-[200px]">
+            <div className="flex h-full flex-col items-center justify-center text-center text-slate-400 dark:text-neutral-500">
+              <ShoppingBag className="h-12 w-12 text-slate-300 dark:text-neutral-700 mb-2 stroke-[1.5]" />
+              <p className="text-sm font-semibold text-slate-700 dark:text-neutral-400">Cart is empty</p>
+              <p className="text-xs text-slate-500 dark:text-neutral-600 mt-1 max-w-[200px]">
                 Scan a barcode or tap products from the catalog to start an order.
               </p>
             </div>
@@ -593,13 +599,13 @@ export default function PosTerminal() {
             cart.map((item) => (
               <div
                 key={item.product._id}
-                className="flex items-center justify-between gap-2 rounded-xl border border-neutral-800 bg-neutral-900/60 p-2.5 transition-all hover:border-neutral-700"
+                className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 dark:border-neutral-800 bg-slate-50/80 dark:bg-neutral-900/60 p-2.5 transition-all hover:border-slate-300 dark:hover:border-neutral-700 shadow-sm"
               >
                 <div className="flex-1 min-w-0">
-                  <h5 className="text-xs font-bold text-white truncate">{item.product.name}</h5>
-                  <p className="text-[11px] text-neutral-400 font-mono">
+                  <h5 className="text-xs font-bold text-slate-900 dark:text-white truncate">{item.product.name}</h5>
+                  <p className="text-[11px] text-slate-600 dark:text-neutral-400 font-mono">
                     {formatCurrency(item.product.price)} × {item.quantity} ={' '}
-                    <span className="text-white font-semibold">
+                    <span className="text-slate-900 dark:text-white font-semibold">
                       {formatCurrency(item.product.price * item.quantity)}
                     </span>
                   </p>
@@ -609,22 +615,22 @@ export default function PosTerminal() {
                 <div className="flex items-center gap-1.5 shrink-0">
                   <button
                     onClick={() => updateQuantity(item.product._id, -1)}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-neutral-700 bg-neutral-950 text-neutral-300 hover:text-white hover:bg-neutral-800"
+                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-neutral-800 transition-colors"
                   >
                     <Minus className="h-3 w-3" />
                   </button>
-                  <span className="w-6 text-center font-mono text-xs font-bold text-white">
+                  <span className="w-6 text-center font-mono text-xs font-bold text-slate-900 dark:text-white">
                     {item.quantity}
                   </span>
                   <button
                     onClick={() => updateQuantity(item.product._id, 1)}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-neutral-700 bg-neutral-950 text-neutral-300 hover:text-white hover:bg-neutral-800"
+                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-neutral-800 transition-colors"
                   >
                     <Plus className="h-3 w-3" />
                   </button>
                   <button
                     onClick={() => removeFromCart(item.product._id)}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg text-neutral-500 hover:text-red-400 hover:bg-neutral-900"
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 dark:text-neutral-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-neutral-900 transition-colors"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
@@ -635,12 +641,12 @@ export default function PosTerminal() {
         </div>
 
         {/* Cart Calculation & Action Footer */}
-        <div className="p-3 sm:p-4 border-t border-neutral-800 bg-neutral-900/80 space-y-2.5 shrink-0">
+        <div className="p-3 sm:p-4 border-t border-slate-200 dark:border-neutral-800 bg-slate-50/90 dark:bg-neutral-900/80 space-y-2.5 shrink-0">
           {/* Discount & Quick Promos */}
           <div className="flex items-center justify-between text-xs">
             <button
               onClick={() => setShowDiscountModal(true)}
-              className="flex items-center gap-1 text-neutral-400 hover:text-orange-400 transition-colors"
+              className="flex items-center gap-1 text-slate-600 dark:text-neutral-400 hover:text-orange-600 dark:hover:text-orange-400 font-medium transition-colors"
             >
               <Tag className="h-3.5 w-3.5" />
               <span>
@@ -651,25 +657,25 @@ export default function PosTerminal() {
               </span>
             </button>
             {discountAmount > 0 && (
-              <span className="font-mono text-emerald-400 font-semibold">
+              <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">
                 -{formatCurrency(discountAmount)}
               </span>
             )}
           </div>
 
           {/* Subtotal, Tax, and Total Summary */}
-          <div className="space-y-1 text-xs text-neutral-400 pt-1 border-t border-neutral-800/80">
+          <div className="space-y-1 text-xs text-slate-600 dark:text-neutral-400 pt-1 border-t border-slate-200 dark:border-neutral-800/80">
             <div className="flex justify-between">
               <span>Subtotal:</span>
-              <span className="font-mono text-white">{formatCurrency(subtotal)}</span>
+              <span className="font-mono text-slate-900 dark:text-white font-semibold">{formatCurrency(subtotal)}</span>
             </div>
             <div className="flex justify-between">
               <span>Tax ({taxRate}%):</span>
-              <span className="font-mono text-white">{formatCurrency(tax)}</span>
+              <span className="font-mono text-slate-900 dark:text-white font-semibold">{formatCurrency(tax)}</span>
             </div>
-            <div className="flex justify-between text-base font-extrabold text-white pt-1 border-t border-neutral-800">
+            <div className="flex justify-between text-base font-extrabold text-slate-900 dark:text-white pt-1 border-t border-slate-200 dark:border-neutral-800">
               <span>Total:</span>
-              <span className="font-mono text-orange-400">{formatCurrency(total)}</span>
+              <span className="font-mono text-orange-600 dark:text-orange-400 font-black">{formatCurrency(total)}</span>
             </div>
           </div>
 
@@ -679,8 +685,8 @@ export default function PosTerminal() {
             disabled={cart.length === 0}
             className={`w-full flex items-center justify-center gap-2 rounded-xl py-3 font-bold text-sm shadow-xl transition-all ${
               cart.length === 0
-                ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
-                : 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-orange-500/25 hover:opacity-95 active:scale-[0.99]'
+                ? 'bg-slate-200 dark:bg-neutral-800 text-slate-400 dark:text-neutral-500 cursor-not-allowed shadow-none'
+                : 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-orange-500/25 hover:opacity-95 active:scale-[0.99] cursor-pointer'
             }`}
           >
             <CreditCard className="h-4 w-4" />
@@ -692,20 +698,20 @@ export default function PosTerminal() {
       {/* MODAL 1: Barcode Scan Simulator & Manual Search */}
       {showBarcodeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl border border-neutral-800 bg-neutral-900 p-5 shadow-2xl text-white space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5 shadow-2xl text-slate-900 dark:text-white space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-neutral-800">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-orange-500/20 text-orange-400">
+                <div className="p-2 rounded-xl bg-orange-500/10 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400">
                   <Barcode className="h-5 w-5" />
                 </div>
                 <div>
                   <h3 className="font-bold text-sm">Barcode Scanner Simulator</h3>
-                  <p className="text-xs text-neutral-400">Hardware Wedge or Rapid Lookup</p>
+                  <p className="text-xs text-slate-500 dark:text-neutral-400">Hardware Wedge or Rapid Lookup</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowBarcodeModal(false)}
-                className="text-neutral-400 hover:text-white font-bold"
+                className="text-slate-400 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white font-bold"
               >
                 ✕
               </button>
@@ -723,7 +729,7 @@ export default function PosTerminal() {
               }}
               className="space-y-2"
             >
-              <label className="text-xs font-semibold text-neutral-300">
+              <label className="text-xs font-semibold text-slate-700 dark:text-neutral-300">
                 Type or Paste Barcode / SKU:
               </label>
               <div className="flex gap-2">
@@ -732,11 +738,11 @@ export default function PosTerminal() {
                   placeholder="e.g. 8901001"
                   value={manualBarcodeInput}
                   onChange={(e) => setManualBarcodeInput(e.target.value)}
-                  className="flex-1 rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-white font-mono focus:border-orange-500 focus:outline-none"
+                  className="flex-1 rounded-xl border border-slate-300 dark:border-neutral-700 bg-slate-50 dark:bg-neutral-950 px-3 py-2 text-sm text-slate-900 dark:text-white font-mono focus:border-orange-500 focus:outline-none placeholder-slate-400 dark:placeholder-neutral-500"
                 />
                 <button
                   type="submit"
-                  className="rounded-xl bg-orange-500 px-4 py-2 text-xs font-bold text-white hover:bg-orange-600"
+                  className="rounded-xl bg-orange-500 px-4 py-2 text-xs font-bold text-white hover:bg-orange-600 cursor-pointer shadow-md shadow-orange-500/20"
                 >
                   Lookup
                 </button>
@@ -744,8 +750,8 @@ export default function PosTerminal() {
             </form>
 
             {/* Quick Test Barcode Buttons for Active Store */}
-            <div className="space-y-2 pt-2 border-t border-neutral-800">
-              <p className="text-xs text-neutral-400">Sample Barcodes for {activeStore?.name}:</p>
+            <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-neutral-800">
+              <p className="text-xs text-slate-500 dark:text-neutral-400">Sample Barcodes for {activeStore?.name}:</p>
               <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
                 {products.slice(0, 6).map((p) => (
                   <button
@@ -754,11 +760,11 @@ export default function PosTerminal() {
                       simulateScan(p.barcode);
                       setShowBarcodeModal(false);
                     }}
-                    className="flex flex-col rounded-xl border border-neutral-800 bg-neutral-950 p-2 text-left hover:border-orange-500 hover:bg-neutral-900 transition-all"
+                    className="flex flex-col rounded-xl border border-slate-200 dark:border-neutral-800 bg-slate-50 dark:bg-neutral-950 p-2 text-left hover:border-orange-500 hover:bg-slate-100 dark:hover:bg-neutral-900 transition-all cursor-pointer shadow-sm"
                   >
-                    <span className="font-mono text-xs font-bold text-orange-400">{p.barcode}</span>
-                    <span className="text-[11px] text-neutral-300 truncate">{p.name}</span>
-                    <span className="text-[10px] text-neutral-500">{formatCurrency(p.price)}</span>
+                    <span className="font-mono text-xs font-bold text-orange-600 dark:text-orange-400">{p.barcode}</span>
+                    <span className="text-[11px] text-slate-700 dark:text-neutral-300 truncate">{p.name}</span>
+                    <span className="text-[10px] text-slate-400 dark:text-neutral-500">{formatCurrency(p.price)}</span>
                   </button>
                 ))}
               </div>
@@ -770,15 +776,15 @@ export default function PosTerminal() {
       {/* MODAL 2: Discount & Promo Code */}
       {showDiscountModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-sm rounded-2xl border border-neutral-800 bg-neutral-900 p-5 shadow-2xl text-white space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
+          <div className="w-full max-w-sm rounded-2xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5 shadow-2xl text-slate-900 dark:text-white space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-neutral-800">
               <div className="flex items-center gap-2">
-                <Tag className="h-5 w-5 text-orange-400" />
+                <Tag className="h-5 w-5 text-orange-500 dark:text-orange-400" />
                 <h3 className="font-bold text-sm">Apply Cart Discount</h3>
               </div>
               <button
                 onClick={() => setShowDiscountModal(false)}
-                className="text-neutral-400 hover:text-white font-bold"
+                className="text-slate-400 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white font-bold"
               >
                 ✕
               </button>
@@ -788,10 +794,10 @@ export default function PosTerminal() {
               <button
                 type="button"
                 onClick={() => setDiscountType('PERCENTAGE')}
-                className={`flex-1 py-2 rounded-xl text-xs font-semibold ${
+                className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                   discountType === 'PERCENTAGE'
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-neutral-950 text-neutral-400'
+                    ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
+                    : 'bg-slate-100 dark:bg-neutral-950 text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-neutral-800'
                 }`}
               >
                 Percentage (%)
@@ -799,8 +805,10 @@ export default function PosTerminal() {
               <button
                 type="button"
                 onClick={() => setDiscountType('FIXED')}
-                className={`flex-1 py-2 rounded-xl text-xs font-semibold ${
-                  discountType === 'FIXED' ? 'bg-orange-500 text-white' : 'bg-neutral-950 text-neutral-400'
+                className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  discountType === 'FIXED'
+                    ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
+                    : 'bg-slate-100 dark:bg-neutral-950 text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-neutral-800'
                 }`}
               >
                 Fixed Amount (Rs.)
@@ -815,7 +823,7 @@ export default function PosTerminal() {
                 value={discountValue || ''}
                 onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)}
                 placeholder={discountType === 'PERCENTAGE' ? 'e.g. 10 for 10%' : 'e.g. 500 for Rs. 500'}
-                className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-4 py-2.5 text-center text-lg font-mono text-white focus:border-orange-500 focus:outline-none"
+                className="w-full rounded-xl border border-slate-300 dark:border-neutral-700 bg-slate-50 dark:bg-neutral-950 px-4 py-2.5 text-center text-lg font-mono text-slate-900 dark:text-white focus:border-orange-500 focus:outline-none placeholder-slate-400 dark:placeholder-neutral-500"
               />
             </div>
 
@@ -828,7 +836,7 @@ export default function PosTerminal() {
                     setDiscountType('PERCENTAGE');
                     setDiscountValue(pct);
                   }}
-                  className="rounded-lg border border-neutral-800 bg-neutral-950 py-1.5 text-xs font-semibold text-neutral-300 hover:border-orange-500 hover:text-white"
+                  className="rounded-lg border border-slate-200 dark:border-neutral-800 bg-slate-50 dark:bg-neutral-950 py-1.5 text-xs font-semibold text-slate-700 dark:text-neutral-300 hover:border-orange-500 hover:text-orange-600 dark:hover:text-white transition-all cursor-pointer"
                 >
                   {pct}% OFF
                 </button>
@@ -837,7 +845,7 @@ export default function PosTerminal() {
 
             <button
               onClick={() => setShowDiscountModal(false)}
-              className="w-full rounded-xl bg-orange-500 py-2.5 text-xs font-bold text-white hover:bg-orange-600"
+              className="w-full rounded-xl bg-orange-500 py-2.5 text-xs font-bold text-white hover:bg-orange-600 cursor-pointer shadow-md shadow-orange-500/20"
             >
               Apply Discount
             </button>
@@ -848,15 +856,15 @@ export default function PosTerminal() {
       {/* MODAL 3: Checkout & Payment Modal (Touchpad / Cash change calculation) */}
       {showCheckoutModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-2xl text-white space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6 shadow-2xl text-slate-900 dark:text-white space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-neutral-800">
               <div>
                 <h3 className="font-bold text-base">Complete Payment</h3>
-                <p className="text-xs text-neutral-400">Total Due: {formatCurrency(total)}</p>
+                <p className="text-xs text-slate-500 dark:text-neutral-400">Total Due: {formatCurrency(total)}</p>
               </div>
               <button
                 onClick={() => setShowCheckoutModal(false)}
-                className="text-neutral-400 hover:text-white font-bold text-lg"
+                className="text-slate-400 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white font-bold text-lg"
               >
                 ✕
               </button>
@@ -866,10 +874,10 @@ export default function PosTerminal() {
             <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() => setPaymentMethod('CASH')}
-                className={`flex flex-col items-center gap-1.5 rounded-xl border p-3 text-xs font-semibold transition-all ${
+                className={`flex flex-col items-center gap-1.5 rounded-xl border p-3 text-xs font-semibold transition-all cursor-pointer ${
                   paymentMethod === 'CASH'
-                    ? 'border-orange-500 bg-orange-500/10 text-orange-400 shadow-md'
-                    : 'border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white'
+                    ? 'border-orange-500 bg-orange-500/10 text-orange-600 dark:text-orange-400 shadow-md'
+                    : 'border-slate-200 dark:border-neutral-800 bg-slate-50 dark:bg-neutral-950 text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-neutral-900'
                 }`}
               >
                 <Banknote className="h-5 w-5" />
@@ -878,10 +886,10 @@ export default function PosTerminal() {
 
               <button
                 onClick={() => setPaymentMethod('CARD')}
-                className={`flex flex-col items-center gap-1.5 rounded-xl border p-3 text-xs font-semibold transition-all ${
+                className={`flex flex-col items-center gap-1.5 rounded-xl border p-3 text-xs font-semibold transition-all cursor-pointer ${
                   paymentMethod === 'CARD'
-                    ? 'border-orange-500 bg-orange-500/10 text-orange-400 shadow-md'
-                    : 'border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white'
+                    ? 'border-orange-500 bg-orange-500/10 text-orange-600 dark:text-orange-400 shadow-md'
+                    : 'border-slate-200 dark:border-neutral-800 bg-slate-50 dark:bg-neutral-950 text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-neutral-900'
                 }`}
               >
                 <CreditCard className="h-5 w-5" />
@@ -890,10 +898,10 @@ export default function PosTerminal() {
 
               <button
                 onClick={() => setPaymentMethod('KIOSK_DIGITAL')}
-                className={`flex flex-col items-center gap-1.5 rounded-xl border p-3 text-xs font-semibold transition-all ${
+                className={`flex flex-col items-center gap-1.5 rounded-xl border p-3 text-xs font-semibold transition-all cursor-pointer ${
                   paymentMethod === 'KIOSK_DIGITAL'
-                    ? 'border-orange-500 bg-orange-500/10 text-orange-400 shadow-md'
-                    : 'border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white'
+                    ? 'border-orange-500 bg-orange-500/10 text-orange-600 dark:text-orange-400 shadow-md'
+                    : 'border-slate-200 dark:border-neutral-800 bg-slate-50 dark:bg-neutral-950 text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-neutral-900'
                 }`}
               >
                 <DollarSign className="h-5 w-5" />
@@ -903,16 +911,16 @@ export default function PosTerminal() {
 
             {/* Cash Calculation Pad */}
             {paymentMethod === 'CASH' ? (
-              <div className="space-y-3 rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
+              <div className="space-y-3 rounded-2xl border border-slate-200 dark:border-neutral-800 bg-slate-50/80 dark:bg-neutral-950 p-4">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-neutral-400">Cash Received:</label>
+                  <label className="text-xs font-semibold text-slate-600 dark:text-neutral-400">Cash Received:</label>
                   <input
                     type="number"
                     step="0.01"
                     value={cashTendered}
                     onChange={(e) => setCashTendered(e.target.value)}
                     placeholder={total.toFixed(2)}
-                    className="w-36 rounded-xl border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-right font-mono text-base font-bold text-white focus:border-orange-500 focus:outline-none"
+                    className="w-36 rounded-xl border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-1.5 text-right font-mono text-base font-bold text-slate-900 dark:text-white focus:border-orange-500 focus:outline-none"
                   />
                 </div>
 
@@ -934,7 +942,7 @@ export default function PosTerminal() {
                         key={val}
                         type="button"
                         onClick={() => setCashTendered(val.toString())}
-                        className="flex-1 rounded-lg border border-neutral-800 bg-neutral-900 py-1 text-xs font-mono font-semibold text-neutral-300 hover:border-orange-500 hover:text-white"
+                        className="flex-1 rounded-lg border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 py-1 text-xs font-mono font-semibold text-slate-700 dark:text-neutral-300 hover:border-orange-500 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer shadow-xs"
                       >
                         {formatCurrency(val, { showDecimals: false })}
                       </button>
@@ -942,11 +950,11 @@ export default function PosTerminal() {
                 </div>
 
                 {/* Change Due Display */}
-                <div className="flex items-center justify-between pt-2 border-t border-neutral-800/80">
-                  <span className="text-xs text-neutral-400">Change Due:</span>
+                <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-neutral-800/80">
+                  <span className="text-xs font-semibold text-slate-600 dark:text-neutral-400">Change Due:</span>
                   <span
-                    className={`font-mono text-lg font-extrabold ${
-                      numericCashTendered >= total ? 'text-emerald-400' : 'text-neutral-500'
+                    className={`font-mono text-lg font-black ${
+                      numericCashTendered >= total ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-neutral-500'
                     }`}
                   >
                     {formatCurrency(changeDue)}
@@ -954,10 +962,10 @@ export default function PosTerminal() {
                 </div>
               </div>
             ) : (
-              <div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-6 text-center space-y-2">
-                <CreditCard className="h-10 w-10 text-orange-400 mx-auto animate-pulse" />
-                <p className="text-sm font-semibold text-white">Card Terminal Ready</p>
-                <p className="text-xs text-neutral-400">
+              <div className="rounded-2xl border border-slate-200 dark:border-neutral-800 bg-slate-50/80 dark:bg-neutral-950 p-6 text-center space-y-2">
+                <CreditCard className="h-10 w-10 text-orange-500 dark:text-orange-400 mx-auto animate-pulse" />
+                <p className="text-sm font-semibold text-slate-900 dark:text-white">Card Terminal Ready</p>
+                <p className="text-xs text-slate-500 dark:text-neutral-400">
                   Tap, insert card, or use contactless smart device to authorize {formatCurrency(total)}.
                 </p>
               </div>
@@ -968,8 +976,8 @@ export default function PosTerminal() {
               disabled={isSubmitting || (paymentMethod === 'CASH' && numericCashTendered < total)}
               className={`w-full rounded-xl py-3 text-sm font-bold shadow-lg transition-all ${
                 paymentMethod === 'CASH' && numericCashTendered < total
-                  ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-emerald-500/25 hover:opacity-95'
+                  ? 'bg-slate-200 dark:bg-neutral-800 text-slate-400 dark:text-neutral-500 cursor-not-allowed shadow-none'
+                  : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-emerald-500/25 hover:opacity-95 cursor-pointer'
               }`}
             >
               {isSubmitting ? 'Finalizing Order...' : `Confirm & Print Receipt (${formatCurrency(total)})`}

@@ -32,7 +32,10 @@ import {
   Lock,
   AlertCircle,
   CheckCheck,
+  Sun,
+  Moon,
 } from 'lucide-react';
+import { useTheme } from '@/context/ThemeContext';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -798,6 +801,7 @@ function ContactForm() {
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function OmniPOSLandingPage() {
+  const { theme, toggleTheme } = useTheme();
   const [showModal, setShowModal] = useState(false);
   const [modalPlan, setModalPlan] = useState<'starter' | 'growth' | 'enterprise'>('growth');
   const [scrollY, setScrollY] = useState(0);
@@ -835,6 +839,21 @@ export default function OmniPOSLandingPage() {
             <a href="#contact" className="hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Contact</a>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Dark / Light Mode Toggle */}
+            <button
+              onClick={toggleTheme}
+              id="landing-theme-toggle"
+              aria-label="Toggle light or dark theme"
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 dark:border-neutral-800 bg-slate-100/80 dark:bg-neutral-900/80 text-slate-700 dark:text-neutral-300 hover:text-orange-500 dark:hover:text-orange-400 hover:border-orange-500/40 dark:hover:border-orange-500/40 transition-all cursor-pointer"
+            >
+              {theme === 'dark' ? (
+                <Sun className="h-4 w-4 text-amber-400 transition-transform duration-200 hover:rotate-45" />
+              ) : (
+                <Moon className="h-4 w-4 text-indigo-600 transition-transform duration-200 hover:-rotate-12" />
+              )}
+            </button>
+
             <Link
               href="/store"
               id="nav-terminal-login"
