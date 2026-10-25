@@ -321,26 +321,26 @@ export default function PosTerminal() {
   };
 
   return (
-    <div className="flex-1 flex flex-col lg:flex-row h-[calc(100vh-53px)] overflow-hidden bg-neutral-950 text-white">
+    <div className="flex-1 flex flex-col lg:flex-row h-[calc(100vh-53px)] overflow-hidden bg-slate-50 dark:bg-neutral-950 text-slate-900 dark:text-white transition-colors duration-150">
       {/* LEFT COLUMN: Product Catalog & Search (Responsive Grid) */}
-      <div className="flex-1 flex flex-col border-r border-neutral-800/80 overflow-hidden">
+      <div className="flex-1 flex flex-col border-r border-slate-200 dark:border-neutral-800/80 overflow-hidden">
         {/* Top Control Bar: Search, Category Pills, Barcode Button */}
-        <div className="p-3 sm:p-4 border-b border-neutral-800 bg-neutral-900/50 space-y-3 shrink-0">
+        <div className="p-3 sm:p-4 border-b border-slate-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/50 space-y-3 shrink-0">
           <div className="flex items-center gap-2">
             {/* Search Input */}
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-neutral-400" />
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 dark:text-neutral-400" />
               <input
                 type="text"
                 placeholder="Search products by name, SKU, or barcode..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-neutral-700 bg-neutral-950 py-2 pl-9 pr-4 text-xs sm:text-sm text-white placeholder-neutral-500 focus:border-orange-500 focus:outline-none"
+                className="w-full rounded-xl border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 py-2 pl-9 pr-4 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:border-orange-500 focus:outline-none"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-2.5 text-xs text-neutral-400 hover:text-white"
+                  className="absolute right-3 top-2.5 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-white"
                 >
                   ✕
                 </button>
@@ -350,7 +350,7 @@ export default function PosTerminal() {
             {/* Quick Barcode Scanner Modal Button */}
             <button
               onClick={() => setShowBarcodeModal(true)}
-              className="flex items-center gap-1.5 rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-xs font-semibold text-orange-400 hover:border-orange-500 hover:bg-neutral-900 transition-colors shrink-0"
+              className="flex items-center gap-1.5 rounded-xl border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 px-3 py-2 text-xs font-semibold text-orange-600 dark:text-orange-400 hover:border-orange-500 hover:bg-slate-50 dark:hover:bg-neutral-900 transition-colors shrink-0"
               title="Open Barcode Scanner Modal"
             >
               <Barcode className="h-4 w-4" />
@@ -360,7 +360,7 @@ export default function PosTerminal() {
             {/* Refresh Catalog */}
             <button
               onClick={fetchProducts}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-neutral-700 bg-neutral-950 text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors shrink-0"
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-neutral-900 transition-colors shrink-0"
               title="Refresh Products"
             >
               <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -376,7 +376,7 @@ export default function PosTerminal() {
                 className={`rounded-xl px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all ${
                   selectedCategory === cat
                     ? 'bg-orange-500 text-white shadow-md shadow-orange-500/25'
-                    : 'bg-neutral-950 text-neutral-400 hover:text-white hover:bg-neutral-800'
+                    : 'bg-white dark:bg-neutral-950 text-slate-600 dark:text-neutral-400 border border-slate-200 dark:border-neutral-800 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-neutral-900'
                 }`}
               >
                 {cat}
@@ -429,12 +429,12 @@ export default function PosTerminal() {
                     disabled={isOutOfStock}
                     className={`group relative flex flex-col justify-between rounded-2xl border p-3 text-left transition-all ${
                       isOutOfStock
-                        ? 'border-red-900/40 bg-neutral-950/50 opacity-60 cursor-not-allowed'
-                        : 'border-neutral-800/80 bg-neutral-900/60 hover:border-orange-500/60 hover:bg-neutral-900 hover:shadow-lg hover:shadow-orange-500/5 active:scale-[0.98]'
+                        ? 'border-red-900/20 bg-slate-100/60 dark:bg-neutral-950/50 opacity-60 cursor-not-allowed'
+                        : 'border-slate-200 dark:border-neutral-800/80 bg-white dark:bg-neutral-900/60 hover:border-orange-500/60 hover:bg-slate-50/60 dark:hover:bg-neutral-900 hover:shadow-lg shadow-sm hover:shadow-orange-500/5 active:scale-[0.98]'
                     }`}
                   >
                     {/* Product Image Thumbnail */}
-                    <div className="relative mb-2 h-28 w-full overflow-hidden rounded-xl bg-neutral-950">
+                    <div className="relative mb-2 h-28 w-full overflow-hidden rounded-xl bg-slate-100 dark:bg-neutral-950">
                       {product.image ? (
                         <Image
                           src={product.image}
@@ -444,7 +444,7 @@ export default function PosTerminal() {
                           className="object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-neutral-700">
+                        <div className="flex h-full w-full items-center justify-center text-slate-400 dark:text-neutral-700">
                           <ShoppingBag className="h-8 w-8" />
                         </div>
                       )}
@@ -455,8 +455,8 @@ export default function PosTerminal() {
                           isOutOfStock
                             ? 'bg-red-500 text-white'
                             : isLowStock
-                            ? 'bg-amber-500 text-neutral-950'
-                            : 'bg-neutral-900/80 text-neutral-300 backdrop-blur-sm'
+                            ? 'bg-amber-500 text-slate-900'
+                            : 'bg-white/90 dark:bg-neutral-900/80 text-slate-700 dark:text-neutral-300 shadow-sm backdrop-blur-sm'
                         }`}
                       >
                         {isOutOfStock ? 'OUT OF STOCK' : `${product.stockQuantity} left`}
@@ -466,22 +466,22 @@ export default function PosTerminal() {
                     {/* Product Info */}
                     <div className="space-y-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] uppercase font-mono tracking-wider text-neutral-400">
+                        <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500 dark:text-neutral-400">
                           {product.category}
                         </span>
-                        <span className="text-[10px] font-mono text-neutral-500">{product.sku}</span>
+                        <span className="text-[10px] font-mono text-slate-400 dark:text-neutral-500">{product.sku}</span>
                       </div>
-                      <h4 className="text-xs sm:text-sm font-bold text-white line-clamp-2 group-hover:text-orange-400 transition-colors">
+                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white line-clamp-2 group-hover:text-orange-500 transition-colors">
                         {product.name}
                       </h4>
                     </div>
 
                     {/* Price and Barcode */}
-                    <div className="mt-3 flex items-center justify-between pt-2 border-t border-neutral-800/80">
-                      <span className="text-sm sm:text-base font-extrabold text-white font-mono">
+                    <div className="mt-3 flex items-center justify-between pt-2 border-t border-slate-100 dark:border-neutral-800/80">
+                      <span className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white font-mono">
                         {formatCurrency(product.price)}
                       </span>
-                      <span className="flex items-center gap-1 font-mono text-[10px] text-neutral-400 group-hover:text-orange-400">
+                      <span className="flex items-center gap-1 font-mono text-[10px] text-slate-400 dark:text-neutral-400 group-hover:text-orange-500">
                         <Barcode className="h-3 w-3" />
                         {product.barcode}
                       </span>
@@ -495,13 +495,13 @@ export default function PosTerminal() {
       </div>
 
       {/* RIGHT COLUMN: Interactive Cart & Checkout Terminal */}
-      <div className="w-full lg:w-[420px] flex flex-col bg-neutral-950 border-t lg:border-t-0 border-neutral-800 shrink-0">
+      <div className="w-full lg:w-[420px] flex flex-col bg-white dark:bg-neutral-950 border-t lg:border-t-0 border-slate-200 dark:border-neutral-800 shrink-0">
         {/* Cart Header */}
-        <div className="p-3 sm:p-4 border-b border-neutral-800 bg-neutral-900/60 flex items-center justify-between">
+        <div className="p-3 sm:p-4 border-b border-slate-200 dark:border-neutral-800 bg-slate-50 dark:bg-neutral-900/60 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShoppingBag className="h-5 w-5 text-orange-400" />
-            <h3 className="font-bold text-sm sm:text-base">Current Cart</h3>
-            <span className="rounded-full bg-orange-500/20 text-orange-400 px-2 py-0.5 text-xs font-mono font-bold">
+            <ShoppingBag className="h-5 w-5 text-orange-500" />
+            <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">Current Cart</h3>
+            <span className="rounded-full bg-orange-500/15 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 px-2 py-0.5 text-xs font-mono font-bold">
               {cart.reduce((s, i) => s + i.quantity, 0)}
             </span>
           </div>
@@ -509,7 +509,7 @@ export default function PosTerminal() {
           {cart.length > 0 && (
             <button
               onClick={clearCart}
-              className="text-xs text-neutral-400 hover:text-red-400 flex items-center gap-1 transition-colors"
+              className="text-xs text-slate-500 dark:text-neutral-400 hover:text-red-500 flex items-center gap-1 transition-colors"
             >
               <Trash2 className="h-3.5 w-3.5" />
               Clear

@@ -44,6 +44,11 @@ class SoundManager {
     }
   }
 
+  // Alias for scan beep
+  public playBeep(): void {
+    this.playScanBeep();
+  }
+
   // 2-tone melodic chime for completed payment / order
   public playSuccessChime(): void {
     if (!this.enabled) return;

@@ -49,27 +49,76 @@ export async function POST(req: NextRequest) {
     await connectToDatabase();
     const body = await req.json();
 
-    if (!body.storeId || !body.name || !body.price || !body.sku || !body.barcode) {
+    const {
+      storeId,
+      name,
+      category = 'General',
+      price,
+      costPrice = 0,
+      image = '',
+      description = '',
+      stockQuantity = 50,
+      lowStockThreshold = 5,
+      isTaxable = true,
+      kitchenCategory = 'RETAIL',
+    } = body;
+
+    if (!storeId || !name || price === undefined || price === null) {
       return NextResponse.json(
-        { error: 'Missing required fields: storeId, name, price, sku, and barcode' },
+        { error: 'Missing required fields: storeId, name, and price are required' },
         { status: 400 }
       );
     }
 
-    // Verify barcode uniqueness within this specific store (tenant isolation)
+    // Auto-generate barcode if not provided or empty
+    let cleanBarcode = (body.barcode || '').trim();
+    if (!cleanBarcode) {
+      cleanBarcode = `89${Math.floor(100000 + Math.random() * 900000)}`;
+    }
+
+    // Auto-generate SKU if not provided or empty
+    let cleanSku = (body.sku || '').trim().toUpperCase();
+    if (!cleanSku) {
+      const prefix = kitchenCategory && kitchenCategory !== 'RETAIL' ? 'FOD' : 'ITM';
+      cleanSku = `${prefix}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+    }
+
+    // Verify barcode uniqueness strictly within this store tenant
     const existing = await Product.findOne({
-      storeId: body.storeId,
-      barcode: body.barcode,
+      storeId,
+      barcode: cleanBarcode,
+      isActive: true,
     });
 
     if (existing) {
       return NextResponse.json(
-        { error: `Barcode ${body.barcode} already exists in this store` },
+        { error: `Barcode ${cleanBarcode} already exists in this store. Please use a unique barcode.` },
         { status: 400 }
       );
     }
 
-    const product = await Product.create(body);
+    const validKitchenCategories = ['GRILL', 'BAR', 'BAKERY', 'DELI', 'RETAIL'];
+    const finalKitchenCategory = validKitchenCategories.includes(kitchenCategory)
+      ? kitchenCategory
+      : 'RETAIL';
+
+    const product = await Product.create({
+      storeId,
+      name: name.trim(),
+      category: category.trim(),
+      price: Number(price),
+      costPrice: Number(costPrice) || 0,
+      sku: cleanSku,
+      barcode: cleanBarcode,
+      image: image.trim(),
+      stockQuantity: Number(stockQuantity) || 0,
+      lowStockThreshold: Number(lowStockThreshold) || 5,
+      isTaxable: Boolean(isTaxable),
+      kitchenCategory: finalKitchenCategory,
+      description: description.trim(),
+      isActive: true,
+    });
+
     return NextResponse.json(product, { status: 201 });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error creating product';
