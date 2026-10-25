@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import { useStore } from '@/context/StoreContext';
 import { soundManager } from '@/lib/audio';
+import { formatCurrency } from '@/lib/currency';
 import confetti from 'canvas-confetti';
 import {
   ShoppingBag,
@@ -320,7 +321,7 @@ export default function KioskMode() {
                     {/* Price and Big Tap Button */}
                     <div className="mt-4 flex items-center justify-between pt-3 border-t border-neutral-800">
                       <span className="text-xl sm:text-2xl font-black text-white font-mono">
-                        ${p.price.toFixed(2)}
+                        {formatCurrency(p.price)}
                       </span>
                       <div className="flex items-center gap-1 rounded-xl bg-orange-500 px-3.5 py-2 text-xs font-black text-white shadow-md shadow-orange-500/20 group-hover:bg-orange-600">
                         <Plus className="h-4 w-4" />
@@ -346,7 +347,7 @@ export default function KioskMode() {
                       Your Order Total
                     </p>
                     <p className="text-2xl font-black text-white font-mono">
-                      ${grandTotal.toFixed(2)}
+                      {formatCurrency(grandTotal)}
                     </p>
                   </div>
                 </div>
@@ -401,7 +402,7 @@ export default function KioskMode() {
                     <h4 className="text-base font-bold text-white">{item.product.name}</h4>
                     {item.notes && <p className="text-xs text-orange-400">Note: {item.notes}</p>}
                     <p className="text-sm font-mono font-extrabold text-neutral-300">
-                      ${item.product.price.toFixed(2)} each
+                      {formatCurrency(item.product.price)} each
                     </p>
                   </div>
                 </div>
@@ -437,15 +438,15 @@ export default function KioskMode() {
           <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 space-y-2 text-sm">
             <div className="flex justify-between text-neutral-400">
               <span>Subtotal:</span>
-              <span className="font-mono text-white font-bold">${subtotal.toFixed(2)}</span>
+              <span className="font-mono text-white font-bold">{formatCurrency(subtotal)}</span>
             </div>
             <div className="flex justify-between text-neutral-400">
               <span>Tax ({taxRate}%):</span>
-              <span className="font-mono text-white font-bold">${tax.toFixed(2)}</span>
+              <span className="font-mono text-white font-bold">{formatCurrency(tax)}</span>
             </div>
             <div className="flex justify-between text-xl font-black text-white pt-3 border-t border-neutral-800">
               <span>Total:</span>
-              <span className="font-mono text-orange-400">${grandTotal.toFixed(2)}</span>
+              <span className="font-mono text-orange-400">{formatCurrency(grandTotal)}</span>
             </div>
           </div>
 
@@ -559,7 +560,7 @@ export default function KioskMode() {
               onClick={() => setCheckoutStep('PAYMENT')}
               className="flex-[2] rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 py-4 text-lg font-black text-white shadow-xl shadow-orange-500/25 hover:opacity-95"
             >
-              Proceed to Pay (${grandTotal.toFixed(2)})
+              Proceed to Pay ({formatCurrency(grandTotal)})
             </button>
           </div>
         </div>
@@ -572,7 +573,7 @@ export default function KioskMode() {
             <p className="text-sm font-semibold uppercase tracking-widest text-orange-400">
               Total Amount
             </p>
-            <h2 className="text-5xl font-black font-mono text-white">${grandTotal.toFixed(2)}</h2>
+            <h2 className="text-5xl font-black font-mono text-white">{formatCurrency(grandTotal)}</h2>
           </div>
 
           {/* Contactless Reader Target Graphic */}
@@ -686,7 +687,7 @@ export default function KioskMode() {
 
             <div className="flex items-center justify-between pt-3 border-t border-neutral-800">
               <span className="text-2xl font-black font-mono">
-                ${selectedProduct.price.toFixed(2)}
+                {formatCurrency(selectedProduct.price)}
               </span>
               <button
                 onClick={() => addToCart(selectedProduct, customizationNotes)}

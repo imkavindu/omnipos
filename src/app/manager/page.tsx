@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useStore } from '@/context/StoreContext';
 import { soundManager } from '@/lib/audio';
+import { formatCurrency } from '@/lib/currency';
 import {
   TrendingUp,
   Boxes,
@@ -234,8 +235,8 @@ export default function ManagerPortal() {
           type: branchType,
           address: branchAddress,
           taxRate: branchTaxRate,
-          currency: 'USD',
-          currencySymbol: '$',
+          currency: 'LKR',
+          currencySymbol: 'Rs.',
         }),
       });
 
@@ -534,10 +535,10 @@ export default function ManagerPortal() {
                 <DollarSign className="h-4 w-4 text-emerald-400" />
               </div>
               <p className="text-2xl sm:text-3xl font-black font-mono text-emerald-400">
-                ${analytics.summary.totalSales.toFixed(2)}
+                {formatCurrency(analytics.summary.totalSales)}
               </p>
               <p className="text-[11px] text-neutral-500">
-                Net Subtotal: ${analytics.summary.subtotal.toFixed(2)}
+                Net Subtotal: {formatCurrency(analytics.summary.subtotal)}
               </p>
             </div>
 
@@ -547,7 +548,7 @@ export default function ManagerPortal() {
                 <span className="font-mono text-xs text-orange-400">STATE</span>
               </div>
               <p className="text-2xl sm:text-3xl font-black font-mono text-white">
-                ${analytics.summary.totalTax.toFixed(2)}
+                {formatCurrency(analytics.summary.totalTax)}
               </p>
               <p className="text-[11px] text-neutral-500">Sales tax automated accrual</p>
             </div>
@@ -561,7 +562,7 @@ export default function ManagerPortal() {
                 {analytics.summary.orderCount}
               </p>
               <p className="text-[11px] text-neutral-500">
-                Avg Ticket: ${analytics.summary.averageTicket.toFixed(2)}
+                Avg Ticket: {formatCurrency(analytics.summary.averageTicket)}
               </p>
             </div>
 
@@ -605,7 +606,7 @@ export default function ManagerPortal() {
                     <span className="text-xs font-semibold">Cash Drawer</span>
                   </div>
                   <span className="font-mono text-sm font-bold text-white">
-                    ${analytics.payments.cash.toFixed(2)}
+                    {formatCurrency(analytics.payments.cash)}
                   </span>
                 </div>
 
@@ -615,7 +616,7 @@ export default function ManagerPortal() {
                     <span className="text-xs font-semibold">Card Terminal</span>
                   </div>
                   <span className="font-mono text-sm font-bold text-white">
-                    ${analytics.payments.card.toFixed(2)}
+                    {formatCurrency(analytics.payments.card)}
                   </span>
                 </div>
 
@@ -625,7 +626,7 @@ export default function ManagerPortal() {
                     <span className="text-xs font-semibold">Self-Checkout Kiosk</span>
                   </div>
                   <span className="font-mono text-sm font-bold text-white">
-                    ${analytics.payments.kiosk.toFixed(2)}
+                    {formatCurrency(analytics.payments.kiosk)}
                   </span>
                 </div>
               </div>
@@ -654,7 +655,7 @@ export default function ManagerPortal() {
                       </div>
                       <div className="text-right font-mono">
                         <span className="text-neutral-400">{item.qty} sold • </span>
-                        <span className="font-bold text-emerald-400">${item.revenue.toFixed(2)}</span>
+                        <span className="font-bold text-emerald-400">{formatCurrency(item.revenue)}</span>
                       </div>
                     </div>
                   ))}
@@ -706,7 +707,7 @@ export default function ManagerPortal() {
                         <Barcode className="h-3 w-3" />
                         <span>{p.barcode}</span>
                       </td>
-                      <td className="px-4 py-3 font-mono text-white">${p.price.toFixed(2)}</td>
+                      <td className="px-4 py-3 font-mono text-white">{formatCurrency(p.price)}</td>
                       <td className="px-4 py-3 font-mono font-bold text-white">
                         {p.stockQuantity} units
                       </td>

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useStore } from '@/context/StoreContext';
 import { useBarcodeScanner } from '@/hooks/useBarcodeScanner';
 import { soundManager } from '@/lib/audio';
+import { formatCurrency } from '@/lib/currency';
 import confetti from 'canvas-confetti';
 import {
   Search,
@@ -239,7 +240,7 @@ export default function PosTerminal() {
 
     if (paymentMethod === 'CASH' && numericCashTendered < total) {
       soundManager.playErrorBuzz();
-      alert(`Cash tendered ($${numericCashTendered}) is less than total amount ($${total.toFixed(2)})`);
+      alert(`Cash tendered (${formatCurrency(numericCashTendered)}) is less than total amount (${formatCurrency(total)})`);
       return;
     }
 
@@ -478,7 +479,7 @@ export default function PosTerminal() {
                     {/* Price and Barcode */}
                     <div className="mt-3 flex items-center justify-between pt-2 border-t border-neutral-800/80">
                       <span className="text-sm sm:text-base font-extrabold text-white font-mono">
-                        ${product.price.toFixed(2)}
+                        {formatCurrency(product.price)}
                       </span>
                       <span className="flex items-center gap-1 font-mono text-[10px] text-neutral-400 group-hover:text-orange-400">
                         <Barcode className="h-3 w-3" />
@@ -597,9 +598,9 @@ export default function PosTerminal() {
                 <div className="flex-1 min-w-0">
                   <h5 className="text-xs font-bold text-white truncate">{item.product.name}</h5>
                   <p className="text-[11px] text-neutral-400 font-mono">
-                    ${item.product.price.toFixed(2)} × {item.quantity} ={' '}
+                    {formatCurrency(item.product.price)} × {item.quantity} ={' '}
                     <span className="text-white font-semibold">
-                      ${(item.product.price * item.quantity).toFixed(2)}
+                      {formatCurrency(item.product.price * item.quantity)}
                     </span>
                   </p>
                 </div>
@@ -645,13 +646,13 @@ export default function PosTerminal() {
               <span>
                 Discount:{' '}
                 {discountValue > 0
-                  ? `${discountValue}${discountType === 'PERCENTAGE' ? '%' : '$'}`
+                  ? `${discountValue}${discountType === 'PERCENTAGE' ? '%' : ' Rs.'}`
                   : 'Add promo'}
               </span>
             </button>
             {discountAmount > 0 && (
               <span className="font-mono text-emerald-400 font-semibold">
-                -${discountAmount.toFixed(2)}
+                -{formatCurrency(discountAmount)}
               </span>
             )}
           </div>
@@ -660,15 +661,15 @@ export default function PosTerminal() {
           <div className="space-y-1 text-xs text-neutral-400 pt-1 border-t border-neutral-800/80">
             <div className="flex justify-between">
               <span>Subtotal:</span>
-              <span className="font-mono text-white">${subtotal.toFixed(2)}</span>
+              <span className="font-mono text-white">{formatCurrency(subtotal)}</span>
             </div>
             <div className="flex justify-between">
               <span>Tax ({taxRate}%):</span>
-              <span className="font-mono text-white">${tax.toFixed(2)}</span>
+              <span className="font-mono text-white">{formatCurrency(tax)}</span>
             </div>
             <div className="flex justify-between text-base font-extrabold text-white pt-1 border-t border-neutral-800">
               <span>Total:</span>
-              <span className="font-mono text-orange-400">${total.toFixed(2)}</span>
+              <span className="font-mono text-orange-400">{formatCurrency(total)}</span>
             </div>
           </div>
 
@@ -683,7 +684,7 @@ export default function PosTerminal() {
             }`}
           >
             <CreditCard className="h-4 w-4" />
-            <span>Pay ${total.toFixed(2)}</span>
+            <span>Pay {formatCurrency(total)}</span>
           </button>
         </div>
       </div>
@@ -757,7 +758,7 @@ export default function PosTerminal() {
                   >
                     <span className="font-mono text-xs font-bold text-orange-400">{p.barcode}</span>
                     <span className="text-[11px] text-neutral-300 truncate">{p.name}</span>
-                    <span className="text-[10px] text-neutral-500">${p.price.toFixed(2)}</span>
+                    <span className="text-[10px] text-neutral-500">{formatCurrency(p.price)}</span>
                   </button>
                 ))}
               </div>
@@ -802,7 +803,7 @@ export default function PosTerminal() {
                   discountType === 'FIXED' ? 'bg-orange-500 text-white' : 'bg-neutral-950 text-neutral-400'
                 }`}
               >
-                Fixed Amount ($)
+                Fixed Amount (Rs.)
               </button>
             </div>
 
@@ -813,7 +814,7 @@ export default function PosTerminal() {
                 max={discountType === 'PERCENTAGE' ? 100 : subtotal}
                 value={discountValue || ''}
                 onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)}
-                placeholder={discountType === 'PERCENTAGE' ? 'e.g. 10 for 10%' : 'e.g. 5 for $5'}
+                placeholder={discountType === 'PERCENTAGE' ? 'e.g. 10 for 10%' : 'e.g. 500 for Rs. 500'}
                 className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-4 py-2.5 text-center text-lg font-mono text-white focus:border-orange-500 focus:outline-none"
               />
             </div>
@@ -851,7 +852,7 @@ export default function PosTerminal() {
             <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
               <div>
                 <h3 className="font-bold text-base">Complete Payment</h3>
-                <p className="text-xs text-neutral-400">Total Due: ${total.toFixed(2)}</p>
+                <p className="text-xs text-neutral-400">Total Due: {formatCurrency(total)}</p>
               </div>
               <button
                 onClick={() => setShowCheckoutModal(false)}
@@ -919,12 +920,15 @@ export default function PosTerminal() {
                 <div className="flex items-center gap-1.5">
                   {[
                     Math.ceil(total),
-                    Math.ceil(total / 10) * 10,
-                    Math.ceil(total / 20) * 20 || 20,
-                    50,
-                    100,
+                    Math.ceil(total / 100) * 100,
+                    Math.ceil(total / 500) * 500 || 500,
+                    Math.ceil(total / 1000) * 1000 || 1000,
+                    1000,
+                    2000,
+                    5000,
                   ]
                     .filter((v, i, a) => v >= total && a.indexOf(v) === i)
+                    .slice(0, 4)
                     .map((val) => (
                       <button
                         key={val}
@@ -932,7 +936,7 @@ export default function PosTerminal() {
                         onClick={() => setCashTendered(val.toString())}
                         className="flex-1 rounded-lg border border-neutral-800 bg-neutral-900 py-1 text-xs font-mono font-semibold text-neutral-300 hover:border-orange-500 hover:text-white"
                       >
-                        ${val}
+                        {formatCurrency(val, { showDecimals: false })}
                       </button>
                     ))}
                 </div>
@@ -945,7 +949,7 @@ export default function PosTerminal() {
                       numericCashTendered >= total ? 'text-emerald-400' : 'text-neutral-500'
                     }`}
                   >
-                    ${changeDue.toFixed(2)}
+                    {formatCurrency(changeDue)}
                   </span>
                 </div>
               </div>
@@ -954,7 +958,7 @@ export default function PosTerminal() {
                 <CreditCard className="h-10 w-10 text-orange-400 mx-auto animate-pulse" />
                 <p className="text-sm font-semibold text-white">Card Terminal Ready</p>
                 <p className="text-xs text-neutral-400">
-                  Tap, insert card, or use contactless smart device to authorize ${total.toFixed(2)}.
+                  Tap, insert card, or use contactless smart device to authorize {formatCurrency(total)}.
                 </p>
               </div>
             )}
@@ -968,7 +972,7 @@ export default function PosTerminal() {
                   : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-emerald-500/25 hover:opacity-95'
               }`}
             >
-              {isSubmitting ? 'Finalizing Order...' : `Confirm & Print Receipt ($${total.toFixed(2)})`}
+              {isSubmitting ? 'Finalizing Order...' : `Confirm & Print Receipt (${formatCurrency(total)})`}
             </button>
           </div>
         </div>
@@ -1000,10 +1004,10 @@ export default function PosTerminal() {
                   <div className="flex-1 pr-2">
                     <p className="font-bold">{it.name}</p>
                     <p className="text-[10px] text-neutral-600">
-                      {it.quantity} @ ${it.price.toFixed(2)}
+                      {it.quantity} @ {formatCurrency(it.price)}
                     </p>
                   </div>
-                  <span className="font-bold">${(it.price * it.quantity).toFixed(2)}</span>
+                  <span className="font-bold">{formatCurrency(it.price * it.quantity)}</span>
                 </div>
               ))}
             </div>
@@ -1012,30 +1016,30 @@ export default function PosTerminal() {
             <div className="space-y-1 border-b border-dashed border-neutral-300 pb-3">
               <div className="flex justify-between">
                 <span>Subtotal:</span>
-                <span>${completedOrder.subtotal.toFixed(2)}</span>
+                <span>{formatCurrency(completedOrder.subtotal)}</span>
               </div>
               {completedOrder.discount > 0 && (
                 <div className="flex justify-between text-emerald-600">
                   <span>Discount:</span>
-                  <span>-${completedOrder.discount.toFixed(2)}</span>
+                  <span>-{formatCurrency(completedOrder.discount)}</span>
                 </div>
               )}
               <div className="flex justify-between">
                 <span>Tax:</span>
-                <span>${completedOrder.tax.toFixed(2)}</span>
+                <span>{formatCurrency(completedOrder.tax)}</span>
               </div>
               <div className="flex justify-between text-sm font-extrabold pt-1">
                 <span>TOTAL:</span>
-                <span>${completedOrder.total.toFixed(2)}</span>
+                <span>{formatCurrency(completedOrder.total)}</span>
               </div>
               <div className="flex justify-between text-[11px] text-neutral-600 pt-1">
                 <span>Method ({completedOrder.paymentMethod}):</span>
-                <span>${(completedOrder.cashTendered || completedOrder.total).toFixed(2)}</span>
+                <span>{formatCurrency(completedOrder.cashTendered || completedOrder.total)}</span>
               </div>
               {completedOrder.changeDue !== undefined && completedOrder.changeDue > 0 && (
                 <div className="flex justify-between font-bold text-neutral-800">
                   <span>Change Given:</span>
-                  <span>${completedOrder.changeDue.toFixed(2)}</span>
+                  <span>{formatCurrency(completedOrder.changeDue)}</span>
                 </div>
               )}
             </div>

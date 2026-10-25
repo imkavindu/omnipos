@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useStore } from '@/context/StoreContext';
 import { soundManager } from '@/lib/audio';
+import { formatCurrency } from '@/lib/currency';
 import {
   Shield,
   Building2,
@@ -302,7 +303,7 @@ export default function SuperAdminSaasDashboard() {
               <DollarSign className="h-4 w-4 text-emerald-400" />
             </div>
             <p className="text-2xl sm:text-3xl font-black font-mono text-emerald-400">
-              ${analytics.platformMrr.toFixed(2)}
+              {formatCurrency(analytics.platformMrr)}
               <span className="text-xs font-normal text-neutral-400 font-sans">/mo</span>
             </p>
             <p className="text-[11px] text-neutral-500">From recurring subscriptions</p>
@@ -327,7 +328,7 @@ export default function SuperAdminSaasDashboard() {
               <TrendingUp className="h-4 w-4 text-blue-400" />
             </div>
             <p className="text-2xl sm:text-3xl font-black font-mono text-white">
-              ${analytics.globalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              {formatCurrency(analytics.globalRevenue)}
             </p>
             <p className="text-[11px] text-neutral-500">Processed across all tenant branches</p>
           </div>
@@ -417,7 +418,7 @@ export default function SuperAdminSaasDashboard() {
                         </span>
                       </td>
                       <td className="px-4 py-3 font-mono font-bold text-white">
-                        ${tenant.monthlyFee.toFixed(2)}/mo
+                        {formatCurrency(tenant.monthlyFee)}/mo
                       </td>
                       <td className="px-4 py-3">
                         <span
@@ -478,7 +479,7 @@ export default function SuperAdminSaasDashboard() {
                   STARTER TIER
                 </span>
                 <div className="pt-2">
-                  <p className="text-3xl font-black font-mono text-white">$49</p>
+                  <p className="text-3xl font-black font-mono text-white">{formatCurrency(49, { showDecimals: false })}</p>
                   <p className="text-xs text-neutral-500">per business / month</p>
                 </div>
                 <p className="text-xs text-neutral-400">
@@ -511,7 +512,7 @@ export default function SuperAdminSaasDashboard() {
                   GROWTH TIER
                 </span>
                 <div className="pt-2">
-                  <p className="text-3xl font-black font-mono text-white">$99</p>
+                  <p className="text-3xl font-black font-mono text-white">{formatCurrency(99, { showDecimals: false })}</p>
                   <p className="text-xs text-neutral-500">per business / month</p>
                 </div>
                 <p className="text-xs text-neutral-400">
@@ -545,7 +546,7 @@ export default function SuperAdminSaasDashboard() {
                   ENTERPRISE TIER
                 </span>
                 <div className="pt-2">
-                  <p className="text-3xl font-black font-mono text-white">$199</p>
+                  <p className="text-3xl font-black font-mono text-white">{formatCurrency(199, { showDecimals: false })}</p>
                   <p className="text-xs text-neutral-500">per business / month</p>
                 </div>
                 <p className="text-xs text-neutral-400">
@@ -661,9 +662,9 @@ export default function SuperAdminSaasDashboard() {
                         onChange={(e) => setOnboardPlanTier(e.target.value as 'starter' | 'growth' | 'enterprise')}
                         className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2.5 text-xs text-white focus:border-orange-500 focus:outline-none"
                       >
-                        <option value="starter">Starter ($49/mo)</option>
-                        <option value="growth">Growth ($99/mo)</option>
-                        <option value="enterprise">Enterprise ($199/mo)</option>
+                        <option value="starter">Starter ({formatCurrency(49)}/mo)</option>
+                        <option value="growth">Growth ({formatCurrency(99)}/mo)</option>
+                        <option value="enterprise">Enterprise ({formatCurrency(199)}/mo)</option>
                       </select>
                     </div>
                   </div>
