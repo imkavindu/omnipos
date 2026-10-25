@@ -11,6 +11,7 @@ import {
   VolumeX,
   Clock,
   LogOut,
+  Lock,
   User,
   Sun,
   Moon,
@@ -24,6 +25,8 @@ export default function Header() {
     userRole,
     activeUser,
     logout,
+    lockTerminal,
+    unpairTerminal,
     soundEnabled,
     toggleSound,
   } = useStore();
@@ -169,14 +172,26 @@ export default function Header() {
             <span>{currentTime || '--:--:--'}</span>
           </div>
 
-          {/* Lock / Sign Out Button */}
+          {/* Lock Terminal Button (Locks staff session to branch PIN screen) */}
           <button
-            onClick={logout}
-            title="Lock Terminal / Sign Out to Authentication Gate"
-            className="flex items-center gap-1.5 rounded-xl border border-red-500/30 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-all"
+            onClick={lockTerminal}
+            id="header-lock-btn"
+            title="Lock Terminal (Return to Staff PIN Gate)"
+            className="flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 transition-all cursor-pointer"
+          >
+            <Lock className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Lock</span>
+          </button>
+
+          {/* Unpair / Sign Out of Store Button */}
+          <button
+            onClick={unpairTerminal}
+            id="header-unpair-btn"
+            title="Unpair Terminal & Exit Store to Public Landing Page"
+            className="flex items-center gap-1.5 rounded-xl border border-red-500/30 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-all cursor-pointer"
           >
             <LogOut className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Lock</span>
+            <span className="hidden sm:inline">Unpair</span>
           </button>
         </div>
       </div>

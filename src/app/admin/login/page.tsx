@@ -10,7 +10,6 @@ import {
   Lock,
   Mail,
   ArrowRight,
-  Sparkles,
   ArrowLeft,
   KeyRound,
   CheckCircle2,
@@ -152,7 +151,6 @@ export default function SuperAdminLoginPage() {
               onClick={handleDemoFill}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-800/60 hover:bg-neutral-800 border border-neutral-700/60 text-neutral-300 text-xs transition-colors cursor-pointer"
             >
-              <Sparkles className="w-3.5 h-3.5 text-rose-400" />
               <span>Fill Eleanor Vance (Platform Owner)</span>
             </button>
             <div className="text-[10px] text-neutral-500 mt-2 font-mono">

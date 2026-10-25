@@ -31,7 +31,6 @@ import {
   Trash2,
   Search,
   Filter,
-  Sparkles,
   Tag,
   Package,
   Layers,

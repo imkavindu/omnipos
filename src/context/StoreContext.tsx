@@ -46,6 +46,8 @@ interface StoreContextType {
   loginWithPin: (pin: string, storeId?: string) => Promise<{ success: boolean; error?: string; redirectUrl?: string }>;
   loginAdmin: (credentials: { email: string; password: string }) => Promise<{ success: boolean; error?: string; redirectUrl?: string }>;
   logout: () => Promise<void>;
+  lockTerminal: () => Promise<void>;
+  unpairTerminal: () => Promise<void>;
   toggleSound: () => void;
   refreshStores: () => Promise<void>;
   refreshSession: () => Promise<void>;
@@ -71,12 +73,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
         // Preference for branch terminal selector
         const savedStoreId = typeof window !== 'undefined' ? localStorage.getItem('omnipos_store_id') : null;
-        const matched = data.find((s) => s._id === savedStoreId);
+        const matched = savedStoreId ? data.find((s) => s._id === savedStoreId) : null;
         if (matched) {
           setActiveStore(matched);
         } else {
-          setActiveStore(data[0]);
-          if (typeof window !== 'undefined') localStorage.setItem('omnipos_store_id', data[0]._id);
+          setActiveStore(null);
         }
       }
     } catch (err) {
@@ -227,14 +228,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     return null;
   };
 
-  // 5. Server-side logout (clears httpOnly cookie via API)
-  const logout = async () => {
+  // 5. Lock terminal (locks current staff session to the branch PIN screen)
+  const lockTerminal = async () => {
     const isSuperAdmin = activeUser?.role === 'SUPER_ADMIN';
     const currentStoreCode = activeStore?.code;
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
     } catch (err) {
-      console.error('Logout error:', err);
+      console.error('Lock error:', err);
     } finally {
       setActiveUserState(null);
       setUserRoleState('CASHIER');
@@ -249,6 +250,39 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       }
     }
   };
+
+  // 6. Full unpair / disconnect terminal from the branch & clear all session tokens
+  const unpairTerminal = async () => {
+    const storeCodeToUnpair = activeStore?.code;
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      if (storeCodeToUnpair) {
+        await fetch('/api/terminal/unpair', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ storeCode: storeCodeToUnpair }),
+        });
+      }
+    } catch (err) {
+      console.error('Unpair error:', err);
+    } finally {
+      setActiveUserState(null);
+      setActiveStore(null);
+      setUserRoleState('CASHIER');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('omnipos_store_session');
+        localStorage.removeItem('omnipos_device_store');
+        localStorage.removeItem('omnipos_store_id');
+        document.cookie = 'omnipos_store_session=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax;';
+        document.cookie = 'omnipos_device_store=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax;';
+        document.cookie = 'omnipos_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax;';
+        window.location.href = '/store';
+      }
+    }
+  };
+
+  // Complete Logout: full storage and cookie purge, redirects to /store connection entry
+  const logout = unpairTerminal;
 
   const toggleSound = () => {
     setSoundEnabled((prev) => {
@@ -280,6 +314,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         loginWithPin,
         loginAdmin,
         logout,
+        lockTerminal,
+        unpairTerminal,
         toggleSound,
         refreshStores: fetchStores,
         refreshSession,

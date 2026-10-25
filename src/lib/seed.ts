@@ -21,7 +21,36 @@ export async function seedDatabase(force = false) {
     await Order.deleteMany({});
   }
 
-  // 1. Create Stores
+  // 1. Hash all credentials in a single batch (store passwords + user PINs/passwords)
+  //    Store passwords gate terminal CONNECTION before the per-user PIN auth step.
+  //    Default store passwords: Bistro2026! | Tech2026! | Bakery2026!
+  const [
+    bistroStorePasswordHash,
+    retailStorePasswordHash,
+    bakeryStorePasswordHash,
+    adminPasswordHash,
+    bistroMgrPin,
+    retailMgrPin,
+    cashier1Pin,
+    cashier2Pin,
+    chefPin,
+    kiosk1Pin,
+    kiosk2Pin,
+  ] = await Promise.all([
+    bcrypt.hash('Bistro2026!', 10),   // DT-BISTRO store connection password
+    bcrypt.hash('Tech2026!', 10),     // OMNI-TECH store connection password
+    bcrypt.hash('Bakery2026!', 10),   // UP-BAKERY store connection password
+    bcrypt.hash('OmniAdmin2026!', 10),
+    bcrypt.hash('1111', 10),
+    bcrypt.hash('2222', 10),
+    bcrypt.hash('1234', 10),
+    bcrypt.hash('5678', 10),
+    bcrypt.hash('9999', 10),
+    bcrypt.hash('4321', 10),
+    bcrypt.hash('8765', 10),
+  ]);
+
+  // 2. Create Stores (each with a hashed storePassword)
   const stores = await Store.create([
     {
       code: 'DT-BISTRO',
@@ -38,8 +67,9 @@ export async function seedDatabase(force = false) {
       ownerEmail: 'marcus.bistro@omnipos.com',
       planTier: 'growth',
       subscriptionStatus: 'active',
-      monthlyFee: 99.0,
+      monthlyFee: 9900,
       isActive: true,
+      storePassword: bistroStorePasswordHash,
     },
     {
       code: 'OMNI-TECH',
@@ -56,8 +86,9 @@ export async function seedDatabase(force = false) {
       ownerEmail: 'sarah.retail@omnipos.com',
       planTier: 'enterprise',
       subscriptionStatus: 'active',
-      monthlyFee: 199.0,
+      monthlyFee: 19900,
       isActive: true,
+      storePassword: retailStorePasswordHash,
     },
     {
       code: 'UP-BAKERY',
@@ -74,8 +105,9 @@ export async function seedDatabase(force = false) {
       ownerEmail: 'david.bakery@omnipos.com',
       planTier: 'starter',
       subscriptionStatus: 'trial',
-      monthlyFee: 49.0,
+      monthlyFee: 4900,
       isActive: true,
+      storePassword: bakeryStorePasswordHash,
     },
   ]);
 
@@ -83,27 +115,7 @@ export async function seedDatabase(force = false) {
   const retailId = stores[1]._id.toString();
   const bakeryId = stores[2]._id.toString();
 
-  // 2. Create Users across roles (All passwords and PINs hashed with bcrypt cost factor: 10)
-  const [
-    adminPasswordHash,
-    bistroMgrPin,
-    retailMgrPin,
-    cashier1Pin,
-    cashier2Pin,
-    chefPin,
-    kiosk1Pin,
-    kiosk2Pin,
-  ] = await Promise.all([
-    bcrypt.hash('OmniAdmin2026!', 10),
-    bcrypt.hash('1111', 10),
-    bcrypt.hash('2222', 10),
-    bcrypt.hash('1234', 10),
-    bcrypt.hash('5678', 10),
-    bcrypt.hash('9999', 10),
-    bcrypt.hash('4321', 10),
-    bcrypt.hash('8765', 10),
-  ]);
-
+  // 3. Create Users across roles (All passwords and PINs hashed with bcrypt cost factor: 10)
   await User.create([
     // Super Admin (SaaS Platform Owner - Email + Password credentials only, storeId is null)
     {
@@ -184,7 +196,7 @@ export async function seedDatabase(force = false) {
     },
   ]);
 
-  // 3. Create Products for Bistro
+  // 4. Create Products for Bistro
   const bistroProducts = [
     {
       storeId: bistroId,
@@ -293,7 +305,7 @@ export async function seedDatabase(force = false) {
     },
   ];
 
-  // 4. Create Products for OmniMart Retail
+  // 5. Create Products for OmniMart Retail
   const retailProducts = [
     {
       storeId: retailId,
@@ -387,7 +399,7 @@ export async function seedDatabase(force = false) {
     },
   ];
 
-  // 5. Create Products for Bakery
+  // 6. Create Products for Bakery
   const bakeryProducts = [
     {
       storeId: bakeryId,
@@ -453,7 +465,7 @@ export async function seedDatabase(force = false) {
 
   await Product.insertMany([...bistroProducts, ...retailProducts, ...bakeryProducts]);
 
-  // 6. Create realistic sample orders for Bistro (including active KDS tickets)
+  // 7. Create realistic sample orders for Bistro (including active KDS tickets)
   await Order.create([
     {
       storeId: bistroId,
@@ -503,7 +515,7 @@ export async function seedDatabase(force = false) {
       tableNumber: 'Table 4',
       customerName: 'Alice Morgan',
       cashierName: 'James Wilson',
-      createdAt: new Date(Date.now() - 12 * 60 * 1000), // 12 mins ago
+      createdAt: new Date(Date.now() - 12 * 60 * 1000),
     },
     {
       storeId: bistroId,
@@ -543,7 +555,7 @@ export async function seedDatabase(force = false) {
       customerName: 'Kiosk Guest #202',
       tableNumber: 'Takeaway',
       cashierName: 'Self Kiosk Station 01',
-      createdAt: new Date(Date.now() - 3 * 60 * 1000), // 3 mins ago
+      createdAt: new Date(Date.now() - 3 * 60 * 1000),
     },
     {
       storeId: bistroId,
@@ -573,7 +585,7 @@ export async function seedDatabase(force = false) {
       ],
       subtotal: 23.0,
       tax: 1.96,
-      discount: 2.3, // 10% promo
+      discount: 2.3,
       discountType: 'PERCENTAGE',
       total: 22.66,
       paymentMethod: 'CASH',
@@ -633,6 +645,15 @@ export async function seedDatabase(force = false) {
   return {
     message: 'Database seeded successfully with multi-tenant stores, products, users, and orders!',
     seeded: true,
-    stores: stores.map((s) => ({ id: s._id.toString(), name: s.name, code: s.code })),
+    stores: stores.map((s) => ({
+      id: s._id.toString(),
+      name: s.name,
+      code: s.code,
+      storePasswordDemo: s.code === 'DT-BISTRO'
+        ? 'Bistro2026!'
+        : s.code === 'OMNI-TECH'
+        ? 'Tech2026!'
+        : 'Bakery2026!',
+    })),
   };
 }

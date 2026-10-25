@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { StoreProvider } from '@/context/StoreContext';
 import { ThemeProvider } from '@/context/ThemeContext';
-import Header from '@/components/Header';
+import ConditionalHeader from '@/components/ConditionalHeader';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -16,9 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'OmniPOS | Enterprise Multi-Store POS & Kiosk Platform',
+  title: 'OmniPOS | Enterprise POS & Kiosk for Sri Lankan Restaurants & Retail',
   description:
-    'Modern, multi-tenant, role-based Point of Sale, Barcode Scanner, Self-Checkout Kiosk, and Kitchen Display System.',
+    'OmniPOS is a modern multi-tenant SaaS point of sale, barcode scanner, self-checkout kiosk, and kitchen display system built for Sri Lankan businesses. Starting at Rs. 4,900/month.',
 };
 
 export default function RootLayout({
@@ -53,7 +53,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-slate-50 dark:bg-neutral-950 text-slate-900 dark:text-neutral-100 selection:bg-orange-500 selection:text-white font-sans transition-colors duration-150">
         <ThemeProvider>
           <StoreProvider>
-            <Header />
+            <ConditionalHeader />
             <div className="flex-1 flex flex-col">{children}</div>
           </StoreProvider>
         </ThemeProvider>

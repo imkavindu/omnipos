@@ -15,7 +15,6 @@ import {
   ShoppingBag as BagIcon,
   CreditCard,
   CheckCircle2,
-  Sparkles,
   ArrowRight,
   ArrowLeft,
   RotateCcw,
@@ -225,7 +224,7 @@ export default function KioskMode() {
       <div className="border-b border-slate-200 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/90 px-6 py-4 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-500 text-white shadow-lg shadow-orange-500/30">
-            <Sparkles className="h-6 w-6" />
+            <Utensils className="h-6 w-6" />
           </div>
           <div>
             <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white">

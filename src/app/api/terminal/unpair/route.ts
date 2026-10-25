@@ -101,6 +101,14 @@ export async function POST(req: NextRequest) {
       sameSite: 'lax',
     });
 
+    response.cookies.set({
+      name: 'omnipos_store_session',
+      value: '',
+      path: '/',
+      maxAge: 0,
+      sameSite: 'lax',
+    });
+
     return response;
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error unpairing terminal';

@@ -17,7 +17,6 @@ import {
   Zap,
   Users,
   Layers,
-  Sparkles,
   ToggleLeft,
   ToggleRight,
   Clock,

@@ -20,6 +20,8 @@ export interface IStore extends Document {
   subscriptionStatus: SubscriptionStatus;
   monthlyFee: number;
   isActive: boolean;
+  /** bcrypt hash of the store-level connection password (select: false — not returned by default queries) */
+  storePassword: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -50,9 +52,19 @@ const StoreSchema: Schema = new Schema<IStore>(
     },
     monthlyFee: { type: Number, default: 99.0 },
     isActive: { type: Boolean, default: true },
+    /**
+     * bcrypt hash (cost factor 10) of the store-level connection password.
+     * Required for all store branch terminal connections — staff must supply
+     * the correct store code + store password before they can reach the PIN pad.
+     */
+    storePassword: { type: String, required: true, select: false },
   },
   { timestamps: true }
 );
 
+// Standard Next.js Mongoose model guard
 export const Store: Model<IStore> =
-  mongoose.models.Store || mongoose.model<IStore>('Store', StoreSchema);
+  (mongoose.models.Store as Model<IStore>) || mongoose.model<IStore>('Store', StoreSchema);
+
+
+
